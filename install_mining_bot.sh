@@ -1,47 +1,26 @@
 #!/data/data/com.termux/files/usr/bin/bash
 set -e
-cd "$(dirname "$0")"
 termux-wake-lock
-
 pkg update -y && pkg upgrade -y
-pkg install -y git clang build-essential curl jq termux-api
 
-echo "⛏️ Mengunduh dan menyusun ccminer..."
-git clone https://github.com/veruscoin/ccminer.git ccminer-source
-cd ccminer-source && make -j$(nproc) && cp ccminer .. && cd .. && rm -rf ccminer-source
-chmod +x ccminer
+echo "📦 Menginstal dependensi..."
+pkg install -y git jq curl bc termux-api
 
-# Buat konfigurasi Luckpool
-cat > config.luckpool.json <<EOF
-{
-  "url": "stratum+tcp://ap.luckpool.net:3956",
-  "user": "RV1xxxxxxxxxxxxxxxxxx.luck",
-  "pass": "x"
-}
-EOF
+echo "🌐 Meng-clone repo mining..."
+rm -rf androverus-miner
+git clone https://github.com/anisbudiono/androverus-miner.git
+cd androverus-miner
 
-# Buat konfigurasi Vipor
-cat > config.vipor.json <<EOF
-{
-  "url": "stratum+tcp://vipor.net:3032",
-  "user": "RV1xxxxxxxxxxxxxxxxxx.vipor",
-  "pass": "x"
-}
-EOF
+echo "🧾 Silakan isi data konfigurasi bot:"
+read -p "🔑 Masukkan BOT TOKEN Telegram: " BOT_TOKEN
+read -p "🆔 Masukkan CHAT ID Telegram: " CHAT_ID
+read -p "👷 Nama Worker: " WORKER
 
-# Input Token dan Chat ID
-read -p "🔐 Masukkan Bot Token Telegram: " BOT
-echo "$BOT" > bot_token.txt
-read -p "🆔 Masukkan Chat ID Telegram: " CHAT
-echo "$CHAT" > chat_id.txt
-read -p "👷 Nama Worker (mis. andro1): " WORKER
+echo "$BOT_TOKEN" > bot_token.txt
+echo "$CHAT_ID" > chat_id.txt
 echo "$WORKER" > worker_name.txt
 
-# Unduh skrip lain dari GitHub
-curl -O https://raw.githubusercontent.com/anisbudiono/androverus-miner/main/start.sh
-curl -O https://raw.githubusercontent.com/anisbudiono/androverus-miner/main/bot.sh
-curl -O https://raw.githubusercontent.com/anisbudiono/androverus-miner/main/run_all.sh
+echo "✅ Konfigurasi disimpan!"
 
-chmod +x *.sh
-
-echo -e "\n✅ Instalasi selesai. Jalankan:\n./run_all.sh"
+echo "🚀 Menjalankan mining + bot Telegram..."
+bash run_all.sh
